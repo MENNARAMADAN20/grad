@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graduation Girls 🎓</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Cairo',sans-serif; }
+
+:root {
+  --pink: #d63384;
+  --light-pink: #ff8ac7;
+  --purple: #9b59b6;
+  --bg: linear-gradient(135deg,#ffd9ec,#ffffff,#eee1ff);
+}
+
+body {
+  min-height:100vh;
+  background: var(--bg);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  overflow-x:hidden;
+}
+
+/* ===== CONFETTI ===== */
+.confetti-piece {
+  position:fixed;
+  width:10px; height:14px;
+  top:-20px;
+  border-radius:3px;
+  animation: confettiFall linear forwards;
+  pointer-events:none;
+  z-index:9999;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotateZ(0deg); opacity:1; }
+  100% { transform: translateY(110vh) rotateZ(720deg); opacity:0; }
+}
+
+/* ===== FLOATING EMOJIS ===== */
+.float-emoji {
+  position:fixed;
+  font-size:2rem;
+  animation: floatUp linear forwards;
+  pointer-events:none;
+  z-index:9998;
+  user-select:none;
+}
+@keyframes floatUp {
+  0%   { transform: translateY(0) scale(1); opacity:1; }
+  100% { transform: translateY(-120vh) scale(1.5); opacity:0; }
+}
+
+/* ===== POPUP ===== */
+#popup {
+  display:none;
+  position:fixed;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%) scale(0.5);
+  background:white;
+  border-radius:25px;
+  padding:30px 40px;
+  z-index:10000;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  border:4px solid var(--pink);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  max-width:90vw;
+}
+@keyframes popIn {
+  to { transform:translate(-50%,-50%) scale(1); }
+}
+#popup.hide {
+  animation: popOut 0.3s ease forwards;
+}
+@keyframes popOut {
+  to { transform:translate(-50%,-50%) scale(0); opacity:0; }
+}
+#popup-text { font-size:22px; color:#333; line-height:1.8; }
+#popup-close {
+  margin-top:20px;
+  background:var(--pink);
+  color:white;
+  border:none;
+  padding:10px 25px;
+  border-radius:15px;
+  font-size:18px;
+  cursor:pointer;
+  font-family:'Cairo',sans-serif;
+  font-weight:700;
+  transition:0.2s;
+}
+#popup-close:hover { transform:scale(1.05); background:#b02070; }
+#overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  z-index:9997;
+  backdrop-filter:blur(3px);
+}
+
+/* ===== HACKING SCREEN ===== */
+#hack-screen {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:99999;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-family:'Courier New', monospace;
+  color:#00ff41;
+  text-align:center;
+  padding:30px;
+}
+#hack-screen.active { display:flex; }
+#hack-text {
+  font-size:clamp(13px, 2vw, 18px);
+  line-height:2;
+  max-width:700px;
+  text-align:right;
+  direction:ltr;
+}
+.hack-bar {
+  width:400px; max-width:80vw;
+  height:20px;
+  background:#001a00;
+  border:2px solid #00ff41;
+  border-radius:5px;
+  margin-top:30px;
+  overflow:hidden;
+}
+.hack-fill {
+  height:100%;
+  width:0%;
+  background:#00ff41;
+  border-radius:3px;
+  transition: width 0.1s ease;
+  box-shadow: 0 0 10px #00ff41;
+}
+#hack-label { color:#00ff41; margin-top:10px; font-size:16px; }
+
+/* ===== DRAMATIC REVEAL ===== */
+#reveal-screen {
+  display:none;
+  position:fixed;
+  inset:0;
+  background: linear-gradient(135deg,#1a0010,#0d0022);
+  z-index:9998;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:30px;
+}
+#reveal-screen.active { display:flex; }
+#reveal-name {
+  font-size:clamp(30px,8vw,72px);
+  font-weight:900;
+  color:transparent;
+  background: linear-gradient(135deg, #ff8ac7, #d63384, #9b59b6);
+  -webkit-background-clip:text;
+  background-clip:text;
+  animation: glowPulse 1.2s ease-in-out infinite alternate;
+}
+@keyframes glowPulse {
+  from { filter: drop-shadow(0 0 10px #d63384); transform:scale(1); }
+  to   { filter: drop-shadow(0 0 40px #ff8ac7); transform:scale(1.05); }
+}
+#reveal-subtitle {
+  font-size:clamp(18px,3vw,28px);
+  color:#ffaadd;
+  margin-top:20px;
+  animation: fadeInUp 0.5s ease forwards;
+}
+#reveal-countdown {
+  font-size:clamp(60px,15vw,150px);
+  font-weight:900;
+  color:#ff8ac7;
+  margin-top:20px;
+  animation: countPulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes countPulse {
+  from { transform:scale(1); }
+  to   { transform:scale(1.3); }
+}
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+  width:100%;
+  max-width:900px;
+  background:white;
+  padding:40px;
+  border-radius:35px;
+  box-shadow:0 10px 35px rgba(0,0,0,0.12);
+  text-align:center;
+  position:relative;
+}
+h1 { font-size:42px; color:#d63384; margin-bottom:15px; }
+.subtitle { font-size:20px; color:#555; margin-bottom:40px; line-height:2; }
+
+.cards {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+.card {
+  background:#fff5fb;
+  padding:30px;
+  border-radius:25px;
+  cursor:pointer;
+  transition:0.3s;
+  border:3px solid transparent;
+  position:relative;
+  overflow:hidden;
+}
+/* .card::after {
+  content:'اضغط لو جريء 😏';
+  position:absolute;
+  bottom:-40px;
+  left:50%; transform:translateX(-50%);
+  font-size:13px;
+  color:var(--pink);
+  white-space:nowrap;
+  transition:0.3s;
+} */
+.card:hover::after { bottom:10px; }
+.card:hover { transform:translateY(-8px); border-color:#ff8ac7; box-shadow:0 15px 35px rgba(214,51,132,0.2); }
+.card h2 { font-size:26px; color:#d63384; margin-bottom:8px; }
+.card p { font-size:16px; color:#888; }
+.card-emoji { font-size:40px; margin-bottom:10px; display:block; }
+
+.profile { display:none; animation:fadeIn 0.5s ease; }
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(15px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.profile img {
+  width:100%; max-width:450px;
+  border-radius:25px;
+  margin-top:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  transition:0.3s;
+}
+.profile img:hover { transform:scale(1.02) rotate(1deg); }
+
+.funny-quote {
+  font-size:20px;
+  color:#555;
+  margin:20px auto;
+  max-width:500px;
+  line-height:2;
+  background:#fff5fb;
+  border-radius:20px;
+  padding:15px 25px;
+  border-right:5px solid var(--pink);
+}
+
+.btn-row { margin-top:20px; display:flex; flex-wrap:wrap; gap:12px; justify-content:center; }
+
+.download-btn {
+  display:inline-block;
+  background:#d63384;
+  color:white;
+  text-decoration:none;
+  padding:14px 25px;
+  border-radius:18px;
+  font-size:17px;
+  font-weight:bold;
+  transition:0.3s;
+  font-family:'Cairo',sans-serif;
+}
+.download-btn:hover { transform:scale(1.05); background:#b02070; }
+
+button {
+  background:#111;
+  color:white;
+  border:none;
+  padding:14px 28px;
+  border-radius:18px;
+  font-size:17px;
+  cursor:pointer;
+  transition:0.3s;
+  font-weight:bold;
+  font-family:'Cairo',sans-serif;
+}
+button:hover { transform:scale(1.05); background:#333; }
+
+.reaction-btn {
+  background: linear-gradient(135deg,#ff8ac7,#d63384);
+  font-size:20px;
+  padding:10px 20px;
+  border-radius:15px;
+}
+.reaction-btn:hover { background:linear-gradient(135deg,#d63384,#9b59b6); }
+</style>
+</head>
+<body>
+
+<!-- Overlay -->
+<div id="overlay" onclick="closePopup()"></div>
+
+<!-- Popup -->
+<div id="popup">
+  <div id="popup-text"></div>
+  <button id="popup-close" onclick="closePopup()">تمام يعني 😂</button>
+</div>
+
+<!-- Hacking Screen -->
+<div id="hack-screen">
+  <div id="hack-text"></div>
+  <div class="hack-bar"><div class="hack-fill" id="hack-fill"></div></div>
+  <div id="hack-label">جار الاختراق... 0%</div>
+</div>
+
+<!-- Dramatic Reveal Screen -->
+<div id="reveal-screen">
+  <div id="reveal-subtitle">🚨 تحذير: الملف سري للغاية 🚨</div>
+  <div id="reveal-name"></div>
+  <div id="reveal-countdown">3</div>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+
+  <!-- Home -->
+  <div id="home">
+    <h1>🎓 Graduation Girls 🎓</h1>
+    <p class="subtitle">آخر أيام الجامعة مينفعش تعدي من حاجات حلوة 😂❤️<br>اختاري البنت اللي تحبيها... أو اللي مش بتحبيها 👀</p>
+    <div class="cards">
+      <div class="card" onclick="startJourney('girl1','Salma Yehia','🌸')">
+        <span class="card-emoji">🌸</span>
+        <h2>Salma Yehia</h2>
+      </div>
+      <div class="card" onclick="startJourney('girl2','Salma Ehab','🌺')">
+        <span class="card-emoji">🌺</span>
+        <h2>Salma Ehab</h2>
+        
+      </div>
+      <div class="card" onclick="startJourney('girl3','Menna Nassar','💐')">
+        <span class="card-emoji">💐</span>
+        <h2>Menna Nassar</h2>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile: Salma Yehia -->
+  <div class="profile" id="girl1">
+    <h1>🌸 Salma Yehia 🌸</h1>
+    <div class="funny-quote" id="quote-girl1"></div>
+    <img src="Salma Yehia.png" alt="Salma Yehia Certificate">
+    <div class="btn-row">
+      <a href="Salma Yehia.png" download class="download-btn">تحميل الشهادة 🎓</a>
+      <button onclick="goHome()">رجوع 💖</button>
+    </div>
+  </div>
+
+  <!-- Profile: Salma Ehab -->
+  <div class="profile" id="girl2">
+    <h1>🌺 Salma Ehab 🌺</h1>
+    <div class="funny-quote" id="quote-girl2"></div>
+    <img src="Salma Ehab.png" alt="Salma Ehab Certificate">
+    <div class="btn-row">
+      <a href="Salma Ehab.png" download class="download-btn">تحميل الشهادة 🎓</a>
+      <button onclick="goHome()">رجوع 💖</button>
+    </div>
+  </div>
+
+  <!-- Profile: Menna Nassar -->
+  <div class="profile" id="girl3">
+    <h1>💐 Menna Nassar 💐</h1>
+    <div class="funny-quote" id="quote-girl3"></div>
+    <img src="Menna Nassar.png" alt="Menna Nassar Certificate">
+    <div class="btn-row">
+      <a href="Menna Nassar.png" download class="download-btn">تحميل الشهادة 🎓</a>
+      <button onclick="goHome()">رجوع 💖</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== DATA =====
+const quotes = {
+  girl1: [
+    "خضيتك صح ؟ اسفه 😂"
+  ],
+  girl2: [
+    "خضيتك صح ؟ اسفه 😂"
+  ],
+  girl3: [
+    "خضيتك صح ؟ اسفه 😂"
+  ]
+};
+
+const reactions = {
+  girl1: ["والله تستاهل يا سلمى يحيى! 🌸🎉","دكتورة المستقبل بالتأكيد! 🩺✨","ربنا يكملها بخير يا رب! 🤲💖"],
+  girl2: ["سلمى إيهاب الأصل! 🌺🎊","كافتيريا الكلية حاتبكي عليكي! 😂☕","مبروك يا ست البنات! 👸✨"],
+  girl3: ["منة نصار Legend! 💐🔥","ملكة الـ group projects! 👑😂","مبروك يا أكثر واحدة بتتكلم! 🎤😂"]
+};
+
+const popupMessages = [
+  "⚠️ تحذير: مشاهدة هذا الملف قد تسبب البكاء من الضحك 😂",
+  "🔒 هذا الملف محمي بطبقات من الذكريات والمواقف المحرجة",
+  "📁 جار تحميل ذكريات 4 سنين... قد يستغرق وقتاً 😅",
+  "🎓 تهانينا! وصلت للملف السري المحظور على الدكاترة 🚫👨‍🏫"
+];
+
+let targetProfile = null;
+
+// ===== SOUNDS (Web Audio API) =====
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+
+function getAudio() {
+  if (!audioCtx) audioCtx = new AudioContext();
+  return audioCtx;
+}
+
+function playBeep(freq=440, dur=0.15, type='sine', vol=0.3) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    osc.type = type;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(); osc.stop(ctx.currentTime + dur);
+  } catch(e){}
+}
+
+function playHackSound() {
+  let t = 0;
+  const interval = setInterval(() => {
+    playBeep(Math.random()*400+100, 0.08, 'square', 0.15);
+    t++;
+    if(t > 20) clearInterval(interval);
+  }, 80);
+}
+
+function playRevealSound() {
+  [261,329,392,523].forEach((f,i) => setTimeout(()=>playBeep(f,0.3,'sine',0.4), i*150));
+}
+
+function playCelebSound() {
+  [523,659,784,1046].forEach((f,i) => setTimeout(()=>playBeep(f,0.2,'triangle',0.35), i*120));
+}
+
+function playClickSound() {
+  playBeep(800, 0.05, 'sine', 0.2);
+}
+
+// ===== CONFETTI =====
+const colors = ['#d63384','#ff8ac7','#9b59b6','#ffd700','#ff6b6b','#54a0ff','#5f27cd'];
+
+function launchConfetti(count=80) {
+  for(let i=0; i<count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random()*100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random()*colors.length)];
+      el.style.width = (Math.random()*10+6) + 'px';
+      el.style.height = (Math.random()*12+8) + 'px';
+      el.style.borderRadius = Math.random()>0.5 ? '50%' : '3px';
+      el.style.animationDuration = (Math.random()*2+2) + 's';
+      el.style.animationDelay = Math.random()*0.5 + 's';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 4000);
+    }, i*20);
+  }
+}
+
+// ===== FLOATING EMOJIS =====
+const celebEmojis = ['🎉','🎊','🎓','💖','🌸','✨','🥳','👑','💐','🔥'];
+
+function floatEmojis(count=12) {
+  for(let i=0; i<count; i++) {
+    setTimeout(()=>{
+      const el = document.createElement('div');
+      el.className = 'float-emoji';
+      el.textContent = celebEmojis[Math.floor(Math.random()*celebEmojis.length)];
+      el.style.left = Math.random()*100 + 'vw';
+      el.style.bottom = '0';
+      el.style.animationDuration = (Math.random()*3+3) + 's';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 6000);
+    }, i*200);
+  }
+}
+
+// ===== POPUP =====
+function showPopup(text, callback) {
+  document.getElementById('popup-text').innerHTML = text;
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('popup').style.display = 'block';
+  document.getElementById('popup').classList.remove('hide');
+  playBeep(600, 0.2, 'sine', 0.3);
+  if(callback) {
+    document.getElementById('popup-close').onclick = () => { closePopup(); setTimeout(callback, 300); };
+  } else {
+    document.getElementById('popup-close').onclick = closePopup;
+  }
+}
+
+function closePopup() {
+  document.getElementById('popup').classList.add('hide');
+  setTimeout(()=>{
+    document.getElementById('popup').style.display='none';
+    document.getElementById('overlay').style.display='none';
+  }, 300);
+}
+
+// ===== HACKING SCREEN =====
+const hackLines = [
+  "> Connecting to university database...",
+  "> ACCESS GRANTED ✓",
+  "> Locating graduation files...",
+  "> Bypassing grade firewall... 🔓",
+  "> Extracting top secret certificate...",
+  "> Deleting bad memories from system...",
+  "> Installing 4 years of coffee addiction...",
+  "> Loading achievement unlocked: GRADUATED 🎓"
+];
+
+function startHackScreen(name, nextFn) {
+  const screen = document.getElementById('hack-screen');
+  const textEl = document.getElementById('hack-text');
+  const fill = document.getElementById('hack-fill');
+  const label = document.getElementById('hack-label');
+  textEl.innerHTML = '';
+  fill.style.width = '0%';
+  label.textContent = 'جار الاختراق... 0%';
+  screen.classList.add('active');
+  playHackSound();
+
+  let i = 0;
+  const step = () => {
+    if(i < hackLines.length) {
+      textEl.innerHTML += `<div style="margin-bottom:6px">${hackLines[i]}</div>`;
+      const pct = Math.round(((i+1)/hackLines.length)*100);
+      fill.style.width = pct + '%';
+      label.textContent = `جار الاختراق... ${pct}%`;
+      i++;
+      setTimeout(step, 350);
+    } else {
+      setTimeout(()=>{
+        screen.classList.remove('active');
+        nextFn();
+      }, 600);
+    }
+  };
+  setTimeout(step, 300);
+}
+
+// ===== DRAMATIC REVEAL =====
+function startReveal(name, nextFn) {
+  const screen = document.getElementById('reveal-screen');
+  const nameEl = document.getElementById('reveal-name');
+  const countdown = document.getElementById('reveal-countdown');
+  nameEl.textContent = name;
+  countdown.textContent = '3';
+  screen.classList.add('active');
+
+  let n = 3;
+  const tick = () => {
+    playRevealSound();
+    countdown.textContent = n;
+    if(n > 1) {
+      n--;
+      setTimeout(tick, 900);
+    } else {
+      setTimeout(()=>{
+        screen.classList.remove('active');
+        nextFn();
+      }, 800);
+    }
+  };
+  setTimeout(tick, 500);
+}
+
+// ===== MAIN JOURNEY =====
+function startJourney(profileId, name, emoji) {
+  playClickSound();
+  targetProfile = profileId;
+
+  // Step 1: Popup message
+  const msg = popupMessages[Math.floor(Math.random()*popupMessages.length)];
+  showPopup(`${emoji} <strong>${name}</strong><br><br>${msg}`, () => {
+    // Step 2: Hack screen
+    startHackScreen(name, () => {
+      // Step 3: Dramatic reveal
+      startReveal(name, () => {
+        // Step 4: Show profile
+        showProfile(profileId);
+      });
+    });
+  });
+}
+
+function showProfile(profileId) {
+  document.getElementById('home').style.display = 'none';
+  document.querySelectorAll('.profile').forEach(p => p.style.display='none');
+
+  // Set random quote
+  const qArr = quotes[profileId];
+  document.getElementById('quote-'+profileId).textContent =
+    qArr[Math.floor(Math.random()*qArr.length)];
+
+  document.getElementById(profileId).style.display = 'block';
+
+  // Celebrate!
+  setTimeout(() => {
+    launchConfetti(100);
+    floatEmojis(15);
+    playCelebSound();
+  }, 300);
+}
+
+function triggerReaction(profileId) {
+  playClickSound();
+  const arr = reactions[profileId];
+  const msg = arr[Math.floor(Math.random()*arr.length)];
+  showPopup('🎉 ' + msg);
+  launchConfetti(50);
+  floatEmojis(8);
+  playCelebSound();
+}
+
+function goHome() {
+  playClickSound();
+  document.querySelectorAll('.profile').forEach(p => p.style.display='none');
+  document.getElementById('home').style.display = 'block';
+}
+</script>
+</body>
+</html>
